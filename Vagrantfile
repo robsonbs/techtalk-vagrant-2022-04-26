@@ -13,6 +13,9 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "ubuntu/focal64"
+
+  config.vm.network "private_network", type: "dhcp"
+
   config.vm.define "bd" do |vmbd|
     vmbd.vm.network "forwarded_port", guest: 5432, host: 5434
 

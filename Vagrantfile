@@ -14,9 +14,12 @@ Vagrant.configure("2") do |config|
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "ubuntu/focal64"
 
-  config.vm.network "private_network", type: "dhcp"
+  # config.vm.network "private_network", type: "dhcp"
 
   config.vm.define "bd" do |vmbd|
+    
+    vmbd.vm.network "private_network", ip: "172.28.128.10"
+
     vmbd.vm.network "forwarded_port", guest: 5432, host: 5434
 
     vmbd.vm.synced_folder "dados", "/persistencia"
@@ -37,6 +40,9 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.define "app" do |vmapp|
+        
+    vmapp.vm.network "private_network", ip: "172.28.128.11"
+
     vmapp.vm.network "forwarded_port", guest: 80, host: 8080
 
     vmapp.vm.synced_folder "dados", "/persistencia"

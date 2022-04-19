@@ -73,4 +73,6 @@ Vagrant.configure("2") do |config|
     rm /var/www/html/index.nginx-debian.html
     cp /persistencia/index.nginx-debian.html /var/www/html/
   SHELL
+
+  config.vm.provision "shell", path: "install_nodejs.sh"
 end

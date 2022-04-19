@@ -13,6 +13,25 @@ Vagrant.configure("2") do |config|
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "ubuntu/focal64"
+  config.vm.define "bd" do |vmbd|
+    vmbd.vm.network "forwarded_port", guest: 5432, host: 5434
+
+    vmbd.vm.synced_folder "dados", "/persistencia"
+
+    vmbd.vm.provider "virtualbox" do |vb|
+      # Display the VirtualBox GUI when booting the machine
+      vb.gui = false
+    
+      # Customize the amount of memory on the VM:
+      vb.name = "VM_Postgres"
+      vb.memory = "1024"
+      vb.cpus = 1  
+    end
+    
+    vmbd.vm.provision "docker" do |docker|
+      docker.run "bitnami/postgresql:latest", args: "--name postgresql -p 5432:5432 -e POSTGRESQL_USERNAME=usr -e POSTGRESQL_PASSWORD=pass -e POSTGRESQL_DATABASE=db"
+    end
+  end
 
   config.vm.define "app" do |vmapp|
     vmapp.vm.network "forwarded_port", guest: 80, host: 8080

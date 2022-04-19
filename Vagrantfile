@@ -45,6 +45,8 @@ Vagrant.configure("2") do |config|
 
     vmapp.vm.network "forwarded_port", guest: 80, host: 8080
 
+    vmapp.vm.network "public_network", bridge: "enp2s0"
+
     vmapp.vm.synced_folder "dados", "/persistencia"
 
     vmapp.vm.provider "virtualbox" do |vb|

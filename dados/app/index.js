@@ -6,7 +6,7 @@ const port = 3000;
 app.get("/", async (req, res) => {
   //Criar client de conexão com o Banco de dados Postgres
   const client = new Client({
-    host: "IP_BANCO",
+    host: "172.28.128.10",
     user: "usr",
     password: "pass",
     database: "db",

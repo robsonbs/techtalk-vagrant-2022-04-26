@@ -70,5 +70,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
     apt-get install -y nginx
+    rm /var/www/html/index.nginx-debian.html
+    cp /persistencia/index.nginx-debian.html /var/www/html/
   SHELL
 end

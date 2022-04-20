@@ -59,6 +59,7 @@ Vagrant.configure("2") do |config|
       vmapp.vm.network "public_network", bridge: "enp2s0"
 
       vmapp.vm.synced_folder "dados", "/persistencia"
+      vmapp.vm.synced_folder ".", "/vagrant", disable: true;
 
       vmapp.vm.provider "virtualbox" do |vb|
         # Display the VirtualBox GUI when booting the machine

@@ -5,6 +5,15 @@
 # configures the configuration version (we support older styles for
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
+
+QTD_MAQUINAS = 2
+BOX_PADRAO = "ubuntu/focal64"
+SCRIPT = <<-SHELL
+  apt-get update && apt-get install -y nginx
+  rm /var/www/html/index.nginx-debian.html
+  cp /persistencia/index.nginx-debian.html /var/www/html/
+SHELL
+
 Vagrant.configure("2") do |config|
   # The most common configuration options are documented and commented below.
   # For a complete reference, please see the online documentation at
@@ -12,7 +21,8 @@ Vagrant.configure("2") do |config|
 
   # Every Vagrant development environment requires a box. You can search for
   # boxes at https://vagrantcloud.com/search.
-  config.vm.box = "ubuntu/focal64"
+  config.vm.box = BOX_PADRAO
+  config.vm.box_version= "=20220411.2.0"
 
   # config.vm.network "private_network", type: "dhcp"
 
@@ -39,35 +49,31 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  config.vm.define "app" do |vmapp|
-        
-    vmapp.vm.network "private_network", ip: "172.28.128.11"
+  (1 .. QTD_MAQUINAS).each do |n|
+    config.vm.define "app#{n}" do |vmapp|
+          
+      vmapp.vm.network "private_network", ip: "172.28.128.1#{n}"
 
-    vmapp.vm.network "forwarded_port", guest: 80, host: 8080
+      vmapp.vm.network "forwarded_port", guest: 80, host: "808#{n}"
 
-    vmapp.vm.network "public_network", bridge: "enp2s0"
+      vmapp.vm.network "public_network", bridge: "enp2s0"
 
-    vmapp.vm.synced_folder "dados", "/persistencia"
+      vmapp.vm.synced_folder "dados", "/persistencia"
 
-    vmapp.vm.provider "virtualbox" do |vb|
-      # Display the VirtualBox GUI when booting the machine
-      vb.gui = false
+      vmapp.vm.provider "virtualbox" do |vb|
+        # Display the VirtualBox GUI when booting the machine
+        vb.gui = false
+      
+        # Customize the amount of memory on the VM:
+        vb.name = "VM_Application#{n}"
+        vb.memory = "1024"
+        vb.cpus = 2
+        vb.customize ["modifyvm", :id, "--cpuexecutioncap","50"]
     
-      # Customize the amount of memory on the VM:
-      vb.name = "Application"
-      vb.memory = "1024"
-      vb.cpus = 2
-      vb.customize ["modifyvm", :id, "--cpuexecutioncap","100"]
-  
-    end
-    vmapp.vm.provision "shell", inline: <<-SHELL
-      apt-get update
-      apt-get install -y nginx
-      rm /var/www/html/index.nginx-debian.html
-      cp /persistencia/index.nginx-debian.html /var/www/html/
-    SHELL
+      end
+      vmapp.vm.provision "shell", inline: SCRIPT
 
-    vmapp.vm.provision "shell", path: "install_nodejs.sh" 
+      vmapp.vm.provision "shell", path: "install_nodejs.sh" 
+    end
   end
-  
 end

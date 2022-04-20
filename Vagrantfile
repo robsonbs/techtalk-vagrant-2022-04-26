@@ -1,30 +1,19 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# All Vagrant configuration is done below. The "2" in Vagrant.configure
-# configures the configuration version (we support older styles for
-# backwards compatibility). Please don't change it unless you know what
-# you're doing.
-
 QTD_MAQUINAS = 2
 BOX_PADRAO = "ubuntu/focal64"
 SCRIPT = <<-SHELL
-  apt-get update && apt-get install -y nginx
+  apt-get update
+  apt-get install -y nginx
   rm /var/www/html/index.nginx-debian.html
   cp /persistencia/index.nginx-debian.html /var/www/html/
 SHELL
 
 Vagrant.configure("2") do |config|
-  # The most common configuration options are documented and commented below.
-  # For a complete reference, please see the online documentation at
-  # https://docs.vagrantup.com.
-
-  # Every Vagrant development environment requires a box. You can search for
-  # boxes at https://vagrantcloud.com/search.
   config.vm.box = BOX_PADRAO
-  config.vm.box_version= "=20220411.2.0"
-
-  # config.vm.network "private_network", type: "dhcp"
+  
+  config.vm.box_version = "=20220411.2.0"
 
   config.vm.define "bd" do |vmbd|
     
@@ -35,17 +24,13 @@ Vagrant.configure("2") do |config|
     vmbd.vm.synced_folder "dados", "/persistencia"
 
     vmbd.vm.provider "virtualbox" do |vb|
-      # Display the VirtualBox GUI when booting the machine
-      vb.gui = false
-    
-      # Customize the amount of memory on the VM:
       vb.name = "VM_Postgres"
       vb.memory = "1024"
       vb.cpus = 1  
     end
     
     vmbd.vm.provision "docker" do |docker|
-      docker.run "bitnami/postgresql:latest", args: "--name postgresql -p 5432:5432 -e POSTGRESQL_USERNAME=usr -e POSTGRESQL_PASSWORD=pass -e POSTGRESQL_DATABASE=db"
+      docker.run "bitnami/postgresql:10.19.0", args: "--name postgresql -p 5432:5432 -e POSTGRESQL_USERNAME=usr -e POSTGRESQL_PASSWORD=pass -e POSTGRESQL_DATABASE=db"
     end
   end
 
@@ -59,19 +44,16 @@ Vagrant.configure("2") do |config|
       vmapp.vm.network "public_network", bridge: "enp2s0"
 
       vmapp.vm.synced_folder "dados", "/persistencia"
+
       vmapp.vm.synced_folder ".", "/vagrant", disable: true;
 
       vmapp.vm.provider "virtualbox" do |vb|
-        # Display the VirtualBox GUI when booting the machine
-        vb.gui = false
-      
-        # Customize the amount of memory on the VM:
         vb.name = "VM_Application#{n}"
         vb.memory = "1024"
         vb.cpus = 2
         vb.customize ["modifyvm", :id, "--cpuexecutioncap","50"]
-    
       end
+
       vmapp.vm.provision "shell", inline: SCRIPT
 
       vmapp.vm.provision "shell", path: "install_nodejs.sh" 
